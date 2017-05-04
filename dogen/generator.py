@@ -10,6 +10,7 @@ import tempfile
 from jinja2 import FileSystemLoader, Environment
 from pykwalify.core import Core
 from pykwalify.errors import SchemaError
+from requests_file import FileAdapter
 
 from dogen.template_helper import TemplateHelper
 from dogen.tools import Tools
@@ -56,7 +57,9 @@ class Generator(object):
 
         self.log.info("Fetched file will be saved as '%s'..." % os.path.basename(output))
 
-        r = requests.get(location, verify=self.ssl_verify, stream=True)
+        s = requests.session()
+        s.mount("file://", FileAdapter())
+        r = s.get(location, verify=self.ssl_verify, stream=True)
 
         if r.status_code != 200:
             raise Exception("Could not download file from %s" % location)
